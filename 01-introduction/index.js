@@ -173,7 +173,6 @@ const slugify = require("slugify");
 const replaceTemplate = require("./modules/replaceTemplate");
 
 //////////////////////////////////////////////// FILES
-/* UNCOMMENT
 
 const textIn = fs.readFileSync("./txt/input.txt", "utf-8");
 
@@ -181,9 +180,9 @@ const textOut = `This is what we know about the avocado: ${textIn}.\nCreated on 
 
 fs.writeFileSync("./txt/output.txt", textOut);
 console.log("file written");
-*/
+
 // Async
-/*UNCOMMENT
+
 fs.readFile("./txt/start.txt", "utf-8", (error, data1) => {
   if (error) return console.log("Error");
 
@@ -204,7 +203,6 @@ fs.readFile("./txt/start.txt", "utf-8", (error, data1) => {
     });
   });
 });
-*/
 
 //////////////////////////////////////////////// SERVER
 /*
@@ -519,3 +517,53 @@ const server = http.createServer((req, res) => {
 server.listen(8000, "127.0.0.1", () => {
   console.log("Listening to requests on port 8000");
 });
+
+/*
+
+1. HOW THE WEB WORKS
+  Typing a url into our browser to open a webpage or requesting data from an api is quite the same. 
+
+  Our browser sends a request to the server where the page is hosted. The server then sends a response which contains the page that we requested. This process is called the request-response model (client-server architecture). Say that we wanted to access google maps.
+
+  Http or https is for the protocol that will be used on the connection.
+
+  The domain name (google.com) is not the real address that we want to access. The conversion of the name of the site to the real ip address happens through the DNS (domain name server).
+
+  1.1 - This is the first step that happens when we try to access a webpage, the browser makes a request to the dns, the dns will match the web address that we've typed to the real server's ip address and send the response with the real address (ip).
+
+    The resource (/maps) is what we want to access. Note that the resource has nothing to do with the port number (443 for https and 80 for http). 
+    The main difference between http and https is that https in encrypted using tls or ssl (which are themselves protocols).
+
+  1.2 - After the browser receives the real ip address, a tcp/ip socket connection is established between the browser and the server of that website. This connection is kept alive for the entire time it takes to transfer all the files of the website.
+
+    The tcp is the transmission control protocol, and ip is the internet protocol. Together, they are communication protocols that define exactly how data travels across the web. 
+    They represent the internet's fundamental control system because they set the rules about how data moves across the internet.
+
+    TCP is responsible for breaking the requests and responses into small pieces called packets before they are sent. Then, once these packets get to their destination, it will reassemble all of them into the original request or response.
+
+    The job of the ip protocol is to send and route all these packages through the internet, so, it ensures that all of them arrive at the destination using the ip address in each packet.
+
+    Now, with the connection established, it is time to make our request and this is an http request (hyperText transfer protocol allows client and server to communicate by sending requests and response messages from client to server and back). 
+
+    The request is made with the start line: the http method, the request target (/maps - if not specified of just a / we request the root) and the http version.
+    There are several http methods, but the most important ones are get (requesting data), post (sending data), put and patch for modify data.
+
+    After the start line comes the http request header's, which is information that we provide to the browser (many possibilities, the language, the type of files if we are sending data).
+
+    Then comes the request body in the case that we are sending data to the server, which contains the data coming from an html form for ex.
+
+  1.3 - The browser then uses an http response to send the website that we required. The http response looks quite similar to the http request (start line, headers and body). 
+  
+  Besides the http version, the response has a status code and a status message (200 OK) to let the client know whether the request that he made has been successful or not. 
+
+  The response headers are information about the response itself, there are a ton available and we also can make our own headers. The difference between request headers and response headers is that it is the backend developer that specifies and sends them back in the response.
+
+  The final part of the response is the body, which is actually present in most responses. It is also the developer who specifically sends back the body in the response. We have done this using response.end, the body should usually contain the html of the website we requested or json data coming back from an api, etc.
+
+  In our example we only have one request to google.com and got one response. However, if it's a website that we're trying to access, there will be many more requests and responses. 
+  This happens because when we do the first request, all we get back is the initial html file, this file will then get scanned for all the assets that it needs to build the entire website (javascript's, css files, image files or others).
+
+  For each of these different files, the browser will then make a new http request to the server. There can happen multiple requests and responses happening at the same time, but the amount is limited, otherwise the connection would start to slow down.
+  When all the files arrive, the page is rendered in the browser according to the html,css and javascript specifications. 
+  
+*/
