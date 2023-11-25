@@ -189,7 +189,7 @@ Another important piece of the nodejs architecture are the events and the event-
 
 Most of the core node modules, like the ones that we've already used (http, file system and timers), are built around an event driven architecture. We can use this architecture to our advantage in our code. 
 
-The concept is quite simple. In node, there are certain objects called event emitters that emit events as soon as something important happens in the app (request hitting the server, timer expiring or a file finishing to read).
+The concept is quite simple. In node, there are certain objects called EventEmitters that emit events as soon as something important happens in the app (request hitting the server, timer expiring or a file finishing to read).
 These events can then be picked up by event listeners that we set up, which will fire off callback functions that are attached to each event listener.
 So, in one hand we have event emitters and on the other event listeners that will react to emitted events by calling callback functions.
 
@@ -215,7 +215,8 @@ Instead, these modules are nicely decoupled and self-contained, each emitting ev
 Also, using an event-driven architecture makes it way more straightforward to react multiple times to the same event. All we have to do is to set up multiple listeners.
   
 
-EVENTS IN PRACTICE
+EVENTS EMITTERS AND LISTENERS IN PRACTICE
 
+We start by creating a new file events.js go there.
   
 */
