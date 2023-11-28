@@ -29,28 +29,27 @@ This happens because emit Synchronously calls each of the listeners registered f
 Returns true if the event had listeners, false otherwise.
 
 */
-/*  UNCOMMENT
+
 // 1.
 const EventEmitter = require("events");
 
 // 2.
-const myEmitter = new EventEmitter();
+const myEmitter1 = new EventEmitter();
 
 // 4.
-myEmitter.on("newSale", () => console.log("There was a new sale!"));
-myEmitter.on("newSale", () => console.log("Costumer name: Francisco"));
+myEmitter1.on("newSale", () => console.log("There was a new sale!"));
+myEmitter1.on("newSale", () => console.log("Costumer name: Francisco"));
 
 // 5.
-myEmitter.on("newSale", (stock) => {
+myEmitter1.on("newSale", (stock) => {
   console.log(`There are now ${stock} items left in stock`);
 });
 
 // 3.
-// myEmitter.emit("newSale");
+// myEmitter1.emit("newSale");
 
 // 5.
-myEmitter.emit("newSale", 9);
-*/
+myEmitter1.emit("newSale", 9);
 
 /*
 
@@ -64,7 +63,6 @@ This is exactly how the different node modules (http...) implement events intern
 
 */
 
-/* UNCOMMENT
 const EventEmitter = require("events");
 
 // 1.
@@ -86,7 +84,7 @@ myEmitter.on("newSale", (stock) => {
 });
 
 myEmitter.emit("newSale", 9);
-*/
+
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -134,3 +132,5 @@ server.on("close", (req, res) => {
 server.listen(8000, "127.0.0.1", () => {
   console.log("Waiting for requests...");
 });
+
+// Go to modules.js now.

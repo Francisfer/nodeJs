@@ -80,24 +80,21 @@ const fs = require("fs");
 
 // Let's start by writing a setTimeout function, we just log a string in the console after 0 seconds.
 
-// UNCOMMENT
-// setTimeout(() => {
-//   console.log("Timer 1 finished");
-// }, 0);
+setTimeout(() => {
+  console.log("Timer 1 finished");
+}, 0);
 
 // Also, let's also use setImmediate(), this one doesn't have any time because it is not necessary.
 
-// UNCOMMENT
-// setImmediate(() => {
-//   console.log("Immediate 1 finished");
-// });
+setImmediate(() => {
+  console.log("Immediate 1 finished");
+});
 
 // Another thing that we're gonna do is to read the test-file and then pass a callback function. Notice that we have to require the module, this is done always in the beginning.
 
-// UNCOMMENT
-// fs.readFile("./test-file.txt", (err, data) => {
-//   console.log("I/O finished");
-// });
+fs.readFile("./test-file.txt", (err, data) => {
+  console.log("I/O finished");
+});
 
 // Finally just a cl here from the top level code (not inside of any callback).
 
@@ -155,7 +152,6 @@ This may cause confusion, that's why it is common to stick with one of them, whi
 This is for more advanced use cases, but you never know. Also, in this lesson he shows how to change the number of threads in the thread pool, and how encrypting a password in a synchronous way block the entire execution. He does this after the next tick and all of the code, even the timers, only get executed after the blocking code (because again, the callbacks are registered in that tick).
 */
 
-/* // UNCOMMENT
 fs.readFile("./test-file.txt", (err, data) => {
   console.log("I/O finished");
 
@@ -177,7 +173,6 @@ fs.readFile("./test-file.txt", (err, data) => {
 });
 
 console.log("Hello from the top level code.");
-*/
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
