@@ -406,4 +406,512 @@ app.get("/api/v1/tours/:id", (req, res) => {
 
 HANDLING PATCH REQUESTS
 
+After get and post, let's handle patch requests to update data.
+
+We have two http methods to update data, put and patch.
+
+With put, we expect that our application receives the entire new updated object.
+With patch, we only expect the properties that the user wants to update in the object. 
+
+We use patch because it is easier to work with the properties than with the entire object. Also, when using mongo, this is what we will do most.
+
+1. We expect a patch request to come in on the url and we also need the id of the tour that should be updated.
+"/api/v1/tours/:id".
+
+2. What do we want to do when there is a patch request? We want to update the data.
+
+We are not going to implement the data update operation, that is just a matter of writing some more javascript that is not really important. 
+We would have to get tour from the json file, change that tour and then save it again to the file.
+
+Instead, we just send a standard response. The code still 200 for updating a resource.
+
+3. We can also implement the same logic for when the id is not valid.
+Now we are ready to test in postman, test to change the only the duration on the body of the request to the tour with id = 3. 
+
+IMPORTANT
+This is just a testing API using files, in the real world we are never going to use files for that.
+
+In this module, we are just implementing all the common verbs (get, post, patch, put, delete) to get a general idea of them, the kind of status codes that we send back, send the number of results when the request asks for several, etc.
+This is what is important here, the basics of working with express and also the correct way of sending back API responses. 
+
+// 1.
+app.patch("/api/v1/tours/:id", (req, res) => {
+  const id = Number(req.params.id);
+  console.log(id);
+  // 3.
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+  // 2.
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour: "Here is where we would send back the updated tour",
+    },
+  });
+});
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+HANDLING DELETE REQUESTS
+
+The last of the crud operations is the delete request.
+
+Just like in the previous lecture, we are not implementing the deleting of a resource in the route handler.
+Again, we are only dealing with files, which is not a real world scenario.
+
+The procedure is very similar to the patch, we still need the id of the tour that we want to delete and the testing id logic.
+
+1. As for the response, the code that we usually send on delete requests is a 204. 204 means no content because we usually don't send any data back, instead we just send null as data.
+The status is still a success of course but the data is null in order to show that the data/resource that we deleted no longer exists.
+
+app.delete("/api/v1/tours/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+
+  // 1.
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+});
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+CODE REFACTORING - Refactoring our routes.
+
+Right now we have all these routes in the code (the http method + url together with the route handler).
+
+We have these routes and the respective handlers kind of all over the place one after the other.
+This makes it hard to read what route we have in the code. All the routes should be together and also the handler functions (separate from the routes).
+
+This is the code that we started with:
+
+// Core modules
+const fs = require("fs");
+
+// Third party modules
+const express = require("express");
+const app = express();
+
+app.use(express.json());
+
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+);
+
+// Read
+app.get("/api/v1/tours", (req, res) => {
+  res.status(200).json({
+    status: "success",
+    results: tours.length,
+    data: {
+      tours,
+    },
+  });
+});
+
+// Read
+app.get("/api/v1/tours/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+  const tour = tours.find((el) => el.id === id);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour,
+    },
+  });
+});
+
+// Create
+app.post("/api/v1/tours", (req, res) => {
+  const newId = tours[tours.length - 1].id + 1;
+
+  const newTour = Object.assign({ id: newId }, req.body);
+
+  tours.push(newTour);
+
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    (err) => {
+      res.status(201).json({
+        status: "success",
+        data: {
+          tour: newTour,
+        },
+      });
+    }
+  );
+});
+
+// Update
+app.patch("/api/v1/tours/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour: "Here is where we would send back the updated tour",
+    },
+  });
+});
+
+// Delete
+app.delete("/api/v1/tours/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+});
+
+const port = 3000;
+app.listen(port, () => {
+  console.log(`App running on port ${port}`);
+});
+
+1. We start by exporting all the handler functions into their own function. Remember that we don't call the functions in the http methods, it is a callback.
+
+Exporting the callbacks already make the code more readable but it still not perfect because, let's say that we want to change the resource name (tours) or change the api version.
+We would have to change it all of the http methods.
+
+The first idea that comes to mind is to do kind of the same thing that we've done with the callbacks, like store the url's in variables, but we can use a better tool.
+
+2. We use the route() method, where we specify the route that we want, then we specify what we want to happen on get and on post. Basically, this route() method allows us to chain the different http methods that we have for the same route.
+
+So, from this:
+// Read
+app.get("/api/v1/tours", getAllTours);
+// Read
+app.get("/api/v1/tours/:id", getTour);
+
+// Create
+app.post("/api/v1/tours", createTour);
+
+// Update
+app.patch("/api/v1/tours/:id", updateTour);
+
+// Delete
+app.delete("/api/v1/tours/:id", deleteTour);
+
+To this:
+app.route("/api/v1/tours").get(getAllTours).post(createTour);
+
+app
+  .route("/api/v1/tours/:id")
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
+
+The code that we end up with:
+
+// Resource name (read sync outside of the event loop)
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+);
+
+// Functions
+// 1.
+const getAllTours = (req, res) => {
+  res.status(200).json({
+    status: "success",
+    results: tours.length,
+    data: {
+      tours,
+    },
+  });
+};
+
+const getTour = (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+  const tour = tours.find((el) => el.id === id);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour,
+    },
+  });
+};
+
+const createTour = (req, res) => {
+  const newId = tours[tours.length - 1].id + 1;
+
+  const newTour = Object.assign({ id: newId }, req.body);
+
+  tours.push(newTour);
+
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    (err) => {
+      res.status(201).json({
+        status: "success",
+        data: {
+          tour: newTour,
+        },
+      });
+    }
+  );
+};
+
+const updateTour = (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour: "Here is where we would send back the updated tour",
+    },
+  });
+};
+
+const deleteTour = (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+};
+
+app.route("/api/v1/tours").get(getAllTours).post(createTour);
+
+app
+  .route("/api/v1/tours/:id")
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
+
+const port = 3000;
+app.listen(port, () => {
+  console.log(`App running on port ${port}`);
+});
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+MIDDLEWARE AND THE REQUEST-RESPONSE CYCLE
+
+In the last couple of lectures we went through the fundamentals of express.
+
+Now we need to go a bit deeper into how express works, for that we need to talk about middleware and the request-response cycle.
+
+The essence of express development is to understand and then use the req-res cycle.
+
+To start off the req-res cycle, our express app receives a req when someone hits our server. For this req(get for ex), it will create a request and a response object.
+
+That data will then be used and processed to generate and send back a meaningful response. In order to process that data in express, we use something called middleware.
+
+The middleware can manipulate the req or the res objects and really execute any other code that we would like. Mainly, middleware is more about the request (remember that we didn't have access directly to the body of a request obj before express.json()).
+
+It is called middleware because it is a function that is executed between, or in the middle of receiving the req and sending the res.
+
+Some examples of middleware are express.json() (also called body parser), logging functionality or setting some some specific http headers. 
+The possibilities are endless with middleware.
+
+In more technical terms, we say that all the middleware together (that we use in our app) is called the middleware stack. 
+What is important to keep in mind here, is that the order of middleware in the stack is defined by the order they are defined in the code.
+
+So, a middleware that appears first in the code is executed before another that appears later. This means that the order of the code matters a lot in Express.
+
+We can imagine this hole process to be like this: 
+1. The req and res objects that where created at the beginning (upon a request hitting our server), go through EACH middleware (where they are processed or some other code is executed).
+
+2. Then, at the end of each middleware function, a next() function is called. We have access to this function in each middleware function. Upon calling the next() function, the following/next middleware in the stack will be executed, with the same req and res objects.
+
+This happens with all the middlewares (functions) until we reach the last one. Here the function is usually a route handler, just like we coded before.
+In this handler, we do not call the next() function, instead we finally send the response data back to the client.
+This marks the end of the req res cycle.
+
+Just like this, the initial req and res objects, go through each middleware step by step.
+We can think of this hole process as kind of a pipeline that our data goes through. 
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+CREATING OUR OWN MIDDLEWARE
+
+app.use(express.json());
+
+We've already used middleware before, remember that we say app.use() (calling the use() method on app) to use/add middleware to our stack.
+
+In our case, calling the json() method on express basically returns a function. This function is then added to the middleware stack. 
+Similar to that, we can create our own middleware functions.
+
+1. We use the app.use() to pass in the function that we want to add to the middleware stack.
+Remember that, in each middleware function, we have access to the req and res objects but also the next function.
+So of course that it is practical to add them all as arguments in the function that we want to add. req res and next are the convention names in express.
+
+IMPORTANT
+We NEED to call next(), otherwise the req res cycle gets stuck at this point.
+
+2. In order to test this we are going to just log something to the console and make any kind of request to our api.
+We have our log, meaning that the this middleware applies to every single type of request that is made to our server. Still with this idea in mind, we can say that our route handlers are themselves kind of middleware. 
+The only difference is that they only apply for a certain url/route.
+
+The more simple middleware functions that we define at the top of our code, they apply to every type of request, no matter the route. This if the route handler comes after in the code.
+
+For example, if we cut this middleware function and use it AFTER a route handler, when we make a request to that route the log from the middleware does not appear. This occurs because the handler for that route ends the req res cycle because it sends a response with res.json().
+If the cycle is finished, the middleware does not get called. 
+
+We define this middleware before all our route handlers.
+
+3. We can create as many middleware functions as we like. But, in this one, let's actually manipulate the req object.
+
+4. What we want to do is to add the current time to the req. We just need to create a new property on the res object.
+With this we are pretending that we have some route handler below that needs the information about when exactly the request happens.
+
+5. Now we could go to the handler for all the tours and simply log this.
+We could also send this in the response.
+
+ // 1.
+app.use((req, res, next) => {
+  // 2.
+  console.log("Hello from the middleware.");
+  next();
+});
+
+// 3.
+app.use((req, res, next) => {
+  // 4.
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
+// Resource name (read sync outside of the event loop)
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+);
+
+// Functions
+const getAllTours = (req, res) => {
+  res.status(200).json({
+    // 5.
+    status: "success",
+    requestedAt: req.requestTime,
+    results: tours.length,
+    data: {
+      tours,
+    },
+  });
+};
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+USING THIRD PARTY MIDDLEWARE
+
+Let's now use a third party middleware function from npm called morgan, in order to make our development life a bit easier.
+
+As reference, the middleware is in the resources tab of the express website.
+
+This is a very popular logging middleware. This function will allow us to see request data right in the console. 
+So, we will be able to see the information about the request (the http method, the url, the status code, the time it took to send back the response and the size of the response in bytes).
+
+This is code that we will include in our application, so we need to install it as a regular dependency and not as a development dependency.
+
+1. Of course, the first thing is to require it.
+
+2. Now let's use this middleware function in our code. In this function we pass an argument that will kind of specify how we want the log to look like.
+We can use some predefined strings for that, we use "dev", but vscode shows us the options.
+
+// 1.
+const morgan = require("morgan");
+
+// Third party middleware
+// 2.
+app.use(morgan("dev"));
+
+This is it, we've required it and we've used it. However let's try to understand how this works.
+Calling the morgan function will return a function similar to the ones that we've wrote in our middleware:
+
+(req, res, next) => {
+ 
+  next();
+}
+
+This makes sense because this is how a middleware function has to look like.
+
+After making a request, this is the log
+GET /api/v1/tours/26 404 3.133 ms - 40
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+IMPLEMENTING THE "USERS" ROUTES.
+
 */
