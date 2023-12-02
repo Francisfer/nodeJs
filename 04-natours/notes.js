@@ -914,4 +914,592 @@ GET /api/v1/tours/26 404 3.133 ms - 40
 
 IMPLEMENTING THE "USERS" ROUTES.
 
+In this lesson we just kind of implement the users route.
+We write the code structure (the route without the id, the route with the id and the handlers/controllers) but their functionality is to simply send the corresponding error to the client.
+We implemented this second resource just so we can refactor all the code in the next lesson.
+
+Let's start to implement some routes for the user's resource.
+
+Our api will have a couple of different resources. The first one, that we've already started to implement, is the tours resource.
+
+Another one will be the users resource, so that, for example we can create user accounts and have different user roles.
+
+For now, this user's resource will be similar to the tours resource, but it is important to start implementing it now for what we are going to learn next.
+
+Don't forget to read the users file async and outside of the event loop.
+
+1. So let's go to our routes, now the route is going to be /users.
+
+We can start to see the structure that we are following. Usually, when we do get() or post() on a route without the id, it means that we either want to get all the users (all the elements/objects that are part of one resource) OR want to create a new resource on the server (in this case a new user) with post. 
+This pattern is always gonna be the same.
+
+So, we respond to the both request methods (get and post) using the functions/routeHandlers that we created like before.
+
+
+2. When we receive a get request with the id, it means that the client wants to get one user. Then we might receive a request to make changes (patch) or to delete the user.
+
+// 1.
+app.route("/api/v1/users").get(getAllUsers).post(createUser);
+
+// 2.
+app
+  .route("/api/v1/users/:id")
+  .get(getUser)
+  .patch(updateUser)
+  .delete(deleteUser);
+
+As for the functions, we are not implement what we should. 
+
+For all the route handlers, we will simply send back a message that this route is not yet implemented, the status is 500 (internal server error).
+We still send back a json object with a status "error".
+
+const getAllUsers = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!"
+  });
+};
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+CREATING AND MOUNTING MULTIPLE ROUTERS
+
+In this lecture, things will start to get more advanced, we will now create multiple routers and use a process called mounting.
+
+Before we start, keep in mind that the ultimate goal is to separate all the code that we have in this file into multiple files.
+
+What we want is to have one file that contains all of the routes for the tours resource, another file for the routes of the users resource, one file for the tours handlers and another for the users handlers. This we will do in the next lesson, for now, and to be able to do this, we need to create one separate router for each of our resources.
+
+If, at this point, we go to the routes code, we can see and say that all the four routes (2 for the tours and 2 for the users) are ALL on the same ROUTER.
+That router is the app object, but if we want to separate these routes into different files (one for each resource route), the best thing to do is to create one router for each of the resources.
+
+Continue after reviewing the code so far.
+
+CODE SO FAR
+
+// CORE MODULES
+const fs = require("fs");
+
+// THIRD PARTY MODULES
+const express = require("express");
+const app = express();
+const morgan = require("morgan");
+
+// THIRD PARTY MIDDLEWARE
+app.use(morgan("dev"));
+
+// MIDDLEWARE
+app.use(express.json());
+
+app.use((req, res, next) => {
+  console.log("Hello from the middleware.");
+  next();
+});
+
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
+// RESOURCES (READ SYNCHRONOUSLY OUTSIDE OF THE EVENT LOOP)
+
+// >>>>>>> Tours
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+);
+
+// >>>>>>> Users
+const users = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/users.json`)
+);
+
+// FUNCTIONS - ROUTE HANDLERS
+// >>>>>>> Tours
+const getAllTours = (req, res) => {
+  res.status(200).json({
+    status: "success",
+    requestedAt: req.requestTime,
+    results: tours.length,
+    data: {
+      tours,
+    },
+  });
+};
+
+const getTour = (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+  const tour = tours.find((el) => el.id === id);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour,
+    },
+  });
+};
+
+const createTour = (req, res) => {
+  const newId = tours[tours.length - 1].id + 1;
+
+  const newTour = Object.assign({ id: newId }, req.body);
+
+  tours.push(newTour);
+
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    (err) => {
+      res.status(201).json({
+        status: "success",
+        data: {
+          tour: newTour,
+        },
+      });
+    }
+  );
+};
+
+const updateTour = (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour: "Here is where we would send back the updated tour",
+    },
+  });
+};
+
+const deleteTour = (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+};
+
+// >>>>>>> Users
+const getAllUsers = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!",
+  });
+};
+
+const getUser = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!",
+  });
+};
+
+const createUser = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!",
+  });
+};
+
+const updateUser = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!",
+  });
+};
+
+const deleteUser = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!",
+  });
+};
+// ROUTES
+
+// >>>>>>> Tours
+app.route("/api/v1/tours").get(getAllTours).post(createTour);
+
+app
+  .route("/api/v1/tours/:id")
+  .get(getTour)
+  .patch(updateTour)
+  .delete(deleteTour);
+
+// >>>>>>> USER'S
+
+app.route("/api/v1/users").get(getAllUsers).post(createUser);
+
+app
+  .route("/api/v1/users/:id")
+  .get(getUser)
+  .patch(updateUser)
+  .delete(deleteUser);
+
+// SERVER START
+const port = 3000;
+app.listen(port, () => {
+  console.log(`App running on port ${port}`);
+});
+
+
+Creating a router for each of the resources is not that complicated, but it is necessary to wrap our head around a couple of concepts.
+
+1. Let's start by saying that tourRouter is = express.Router();
+Like this, we create a new router and save into the variable.
+const tourRoute = express.Router();
+
+2. Now let's use this router for these two routes. For that we use that variable instead of the app object.
+tourRoute.route("/api/v1/tours").get(getAllTours).post(createTour);
+
+3. So far so good, but using the variable instead of the app object actually disconnects the routes from our application. In order to connect this new router with our application we need to use it as middleware.
+
+In fact, the new, modular, tourRouter is a real middleware (express.Router()).
+If it is middleware we can say app.use the tourRouter in our application.
+And where do we want to use/run the middleware? We want to use it in the users specific route (first argument of the get method)
+app.use("/api/v1/tours", tourRoute);
+NEEDS TO BE AFTER WE DECLARE THE VARIABLES.
+
+At this point we need to understand that, like this, it is as if we have created a sub app for that route. So, being a new sub app for a route, means that the tourRouter middleware only runs on the route that we've specified upon use(). Being so, that becomes the root when we are in the router.
+
+This process is mounting the router. Mounting a new router on a route. Meaning that we can only use() the routers after we declare them in the code.
+
+
+// 1.
+const tourRouter = express.Router();
+const userRouter = express.Router();
+
+// 2.
+tourRouter.route("/").get(getAllTours).post(createTour);
+
+tourRouter.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
+>>>>>>> User's
+userRouter.route("/").get(getAllUsers).post(createUser);
+
+userRouter.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
+
+
+// 3. 
+app.use("/api/v1/tours", tourRouter);
+app.use("/api/v1/users", userRouter);
+
+With this, we are no able to separate our different routers into different files in the next lecture.
+
+
+ALL THE CODE BEFORE REFACTORING:
+
+// CORE MODULES
+const fs = require("fs");
+
+// THIRD PARTY MODULES
+const express = require("express");
+const app = express();
+const morgan = require("morgan");
+
+// THIRD PARTY MIDDLEWARE
+app.use(morgan("dev"));
+
+// MIDDLEWARE
+app.use(express.json());
+
+app.use((req, res, next) => {
+  console.log("Hello from the middleware.");
+  next();
+});
+
+app.use((req, res, next) => {
+  req.requestTime = new Date().toISOString();
+  next();
+});
+
+// RESOURCES (READ SYNCHRONOUSLY OUTSIDE OF THE EVENT LOOP)
+
+// >>>>>>> Tours
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+);
+
+// FUNCTIONS - ROUTE HANDLERS
+// >>>>>>> Tours
+const getAllTours = (req, res) => {
+  res.status(200).json({
+    status: "success",
+    requestedAt: req.requestTime,
+    results: tours.length,
+    data: {
+      tours,
+    },
+  });
+};
+
+const getTour = (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+  const tour = tours.find((el) => el.id === id);
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour,
+    },
+  });
+};
+
+const createTour = (req, res) => {
+  const newId = tours[tours.length - 1].id + 1;
+
+  const newTour = Object.assign({ id: newId }, req.body);
+
+  tours.push(newTour);
+
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    (err) => {
+      res.status(201).json({
+        status: "success",
+        data: {
+          tour: newTour,
+        },
+      });
+    }
+  );
+};
+
+const updateTour = (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      tour: "Here is where we would send back the updated tour",
+    },
+  });
+};
+
+const deleteTour = (req, res) => {
+  const id = Number(req.params.id);
+
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+
+  res.status(204).json({
+    status: "success",
+    data: null,
+  });
+};
+
+// >>>>>>> Users
+const getAllUsers = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!",
+  });
+};
+
+const getUser = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!",
+  });
+};
+
+const createUser = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!",
+  });
+};
+
+const updateUser = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!",
+  });
+};
+
+const deleteUser = (req, res) => {
+  res.status(500).json({
+    status: "error",
+    message: "This route is not yet defined!",
+  });
+};
+
+// ROUTES
+
+const tourRouter = express.Router();
+const userRouter = express.Router();
+
+// >>>>>>> Tours
+tourRouter.route("/").get(getAllTours).post(createTour);
+
+tourRouter.route("/:id").get(getTour).patch(updateTour).delete(deleteTour);
+
+// >>>>>>> User's
+userRouter.route("/").get(getAllUsers).post(createUser);
+
+userRouter.route("/:id").get(getUser).patch(updateUser).delete(deleteUser);
+
+// Need to use the routers only after we declare them.
+app.use("/api/v1/tours", tourRouter);
+app.use("/api/v1/users", userRouter);
+
+// SERVER START
+const port = 3000;
+app.listen(port, () => {
+  console.log(`App running on port ${port}`);
+});
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+CODE REFACTORING - A BETTER FILE STRUCTURE
+
+Remember from the last lesson that we want to separate our routers into different files. That will be the first step that we will do here.
+
+1. We create a new folder called routes, in there we will have one file for tour routes and one for the user routes.
+
+It is needless to say that we are going to start working with modules.
+
+2. We start with the tour router, we move all the respective code in there, require the modules that we need at the top (express) and export the router.
+
+Now that we are separating the routers into their own file, it is a convention to call the variable router instead of tourRouter (we already make that distinction in the name of this module).
+
+To export the router, since we only have one thing to export we use module.exports.
+At this point we also put in this module the route handlers/functions, so that the code doesn't brake. Also, we move the files that we read synchronously (all the tours).
+
+3. Now we import both of the routers into our main file (app.js). To do that, since we've used module.exports, we can simply define the variable with the router name. 
+Note that we need the fs module on tourRoutes and, also in there, we need to change the readFileSync path because our __dirname there makes us jump one time to go to the dev data.
+const tours = JSON.parse(
+  fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
+);
+
+With this we have the routers separated into different files. We can say that each of them is one small sub application. Now it makes more sense to see. It is then in the global app.js that we import and mount the routers on the two different routes.
+
+It needs practice to automate and understand these tactics, for now just keep in mind that we've created these different routers for each of the resources to have a nice separation of concern between these resources.
+
+Basically, creating one small app for each of them and putting everything together in one main app file. 
+
+This main app file is mainly used for middleware declarations.
+This means that here we have all the middleware that we want to apply to all the routes.
+
+For now, we have four middlewares that we want to apply to ALL of the routes (the morgan to have a nice log of the req; the express.json to have access to the req body and the other two that we've created).
+THEN, FOR THE TOURS ROUTE, we want to apply the tourRouter middleware AND FOR THE USERS ROUTE, we want to apply the userRouter middleware.
+LIKE THIS IS BECOMES EVEN MORE CLEAR.
+
+4. Now we need to remove the route handlers from the routes files. For this we will create a new folder and name it as controllers.
+In there we have two files, tourController and userController.
+
+5. After passing all the route handlers and the async code that is needed (just for the tours), we need to export all of these functions from this module.
+In this case we do not have just one export, so we will put all of these functions into the exports object.
+exports.getTour = () => {}
+
+6. Now we import them in each of the routes. 
+const tourController = require("./../controllers/tourController");
+
+Like this, the variable becomes an object with all of the handlers that we need, all we need to do is: 
+
+router
+  .route("/")
+  .get(tourController.getAllTours)
+  .post(tourController.createTour);
+
+router
+  .route("/:id")
+  .get(tourController.getTour)
+  .patch(tourController.updateTour)
+  .delete(tourController.deleteTour);
+
+We could have used destructuring in order to write them directly, but it is better like this.
+
+THE FLOW GOES LIKE THIS: 
+We start receiving the requests in the app.js file
+
+Then, depending on the route, enter one of the routers.
+
+Let's suppose that is the tours router, in there, again depending on the route (if the request is for the root (now app.use("/api/v1/tours", tourRouter);) or for the id) and also depending on the type of the request, it will execute one of the controllers.
+After this, the response gets sent and the req res cycle finishes. 
+LECTURE 63.
+
+7. The last step is to create a server.js file.
+This is done because it is a good practice to have everything that is related to express in one file (app.js) and everything that is related to the server in another main file (server.js).
+
+This means that, starting now, server.js will be our starting file where everything starts and it is there where we listen to our server.
+
+We move the respective code into the file and import our application (which is exported from app.js).
+
+With this, app.js has everything that is related with the application configuration in one standalone file.
+
+As for the server.js, we will later have other stuff in this file that is not related with express, but still related with our application (database configurations, error handling, environment variables). All of this will live in this server.js, which is kind of, but NOT, our entry point.
+
+We need to change the script for nodemon because we no longer listen to app.js, we listen the server.js file.
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+PARAM MIDDLEWARE
+
+Let's create a special type of middleware called param middleware.
+
+This is middleware that only runs for specific parameters, basically, when we have a certain parameter in our url.
+
+In our example, the only parameter that we might have in our route is the id. So, we can write middleware that only runs when the id is present in the url.
+
+We write this code in the router, so in one of the routes file that we have.
+We will do this in the tourRoutes file (userRoutes code don't actually do anything at this point).
+
+1. On our router, we call the param() method. This method accepts a string as the first argument, this is where we specify the parameter that we want to search for (the parameter for which this middleware is going to run).
+The second argument is for the function/callback/handler.
+
+As usual with middleware, we get access to the req, the res objects and also to the next() function.
+However, the param method gives us access to a forth argument, which is the value of the parameter in question. We call it val.
+
+2. For now we just log the result of val when we make a req with the id of the tour (if we don't specify the id, no log appears.)
+Also, NEVER forget the next() function.
 */
