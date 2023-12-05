@@ -11,10 +11,13 @@ const tourRouter = require("./routes/tourRoutes");
 const userRouter = require("./routes/userRoutes");
 
 // THIRD PARTY MIDDLEWARE
-app.use(morgan("dev"));
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
 
 // MIDDLEWARE
-app.use(express.json());
+app.use(express.json()); // Built in
+app.use(express.static(`${__dirname}/public`));
 
 app.use((req, res, next) => {
   console.log("Hello from the middleware.");

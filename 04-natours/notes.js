@@ -1502,4 +1502,215 @@ However, the param method gives us access to a forth argument, which is the valu
 
 2. For now we just log the result of val when we make a req with the id of the tour (if we don't specify the id, no log appears.)
 Also, NEVER forget the next() function.
+
+// 1.
+router.param("id", (req, res, next, val) => {
+  // 2.
+  console.log(`Tour id is ${val}`);
+  next();
+});
+
+
+This function will not run for any of the user routes (because it is only specified in this router - in this mini application).
+
+To review all the process, let's suppose that we have an incoming request on tours/id route. 
+
+The request will go through all the middlewares in the app.js (middleware stack). When it reaches the routers middleware, it will get into the tourRouter middleware, where the response is given and the req res cycle ends.
+
+This is how param middleware works, it is not that useful for now because we only have the id to work with. However, there is a practical use case that we can use here.
+
+If we go to our handler functions file, so the controllers for the tours route, we see that all the handler functions that use the id need to check if the id is valid (getTour(), updateTour() and deleteTour()). 
+
+All those functions use the same code, which is not a good practice because we repeat ourselves (also notice that it is with req.params.id that we make the check).
+The solution is, of course, to create a 
+param middleware and perform the check outside, with a outside middleware that is going to run before the request hits the handler functions.
+Notice the importance of the return statement in that code, if we don't use it, the code will still running, go through next() and the next middleware, where we send another response (which gives us an error, we want the code to stop if the id is not valid.)
+
+
+We write AND export this middleware function in the controller. So that we can call it in the tourRoutes before all the other code.
+
+router.param("id", tourController.checkID); IN TOUR ROUTES.
+
+We should always work with the middleware functionality instead of creating a function inside of each controller so that we can validate the id inside of the controllers that need it. Like this the controller function is clean an does just what it needs to do, having just one purpose.
+They can get the tour, create it or delete it, but the validation is not in their concern. 
+
+Even if we add another controller depending on the id, the validation was something that we no longer have to worry about because the code flow checks for it before.
+
+This is a very important tool to write express applications.
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+CHAINING MULTIPLE MIDDLEWARE FUNCTIONS.
+
+We do this for the same route of course. Up until this point, whenever we wanted to define a middleware we only ever passed one middleware function.
+
+For example (in the tourRoutes router), to handle the post request for creating a new tour, we only passed in the createTour middleware function that is in the tourController file. This is the only function to be called whenever we get a post request.
+
+Let's say that we want to run multiple middleware functions. We might want to do this, to run a middleware before createTour, to check the data that is coming in the body. Just like we did for the id, before the actual route handlers (so that they are only concerned with getting, updating, or deleting).
+
+In this example with post, we might want to do the same thing.
+
+So we start by writing the code in the tour controller to export. DON'T FORGET THE NEXT() WHEN BUILDING MIDDLEWARE.
+
+exports.checkBody = (req, res, next) => {
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: "fail",
+      message: "No name or price for the tour",
+    });
+  }
+  next();
+};
+
+Then we just need to add this middleware function to the post stack, this is how we chain different middleware:
+
+router
+  .route("/")
+  .get(tourController.getAllTours)
+  .post(tourController.checkBody, tourController.createTour);
+
+The post request arrives, the code from the checkBody runs, if everything is ok the next() will call the createTour middleware.
+
+We will use this kind of logic all the time though this project because it is very useful. Chaining multiple kind of handlers for the same route in order to make checks (if a certain user is logged in, of if he has the privileges (access rights to be able to write a new tour) or all the things that we want to check before the tour is actually created).
+
+We use this because we want to take all the logic there is not concerned with creating the tour/resource outside of that handler.
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+HOW TO SERVE STATIC FILES WITH EXPRESS (from a folder and not from a route like we did with all the tours).
+
+First of all, what does static files actually mean? Those are the files that are sitting in our file system, which we can't access by using our routes, currently.
+
+For example, we have the overview.html file in the pubic folder, but there is no way that we can access this using the browser, the same goes to the images files etc simply because we haven't define any route for a url like this: 3000/public/overview.html.
+We do not have any handler that is associated with this route.
+
+This to say that if we want to access something from our file system, we need to use a built in express middleware.
+
+We do this in the app.js file of course.
+In this section we are just talking about the api, so there is no need to serve static files like images or html, but since this is an introduction to express, this content is also important.
+
+As we said, we use a built in middleware where we pass the directory from which we want to serve static files, we are going to use the public folder.
+
+In order to see this in the browser we do not include public in the url, just: http://127.0.0.1:3000/overview.html
+
+Although the images aren't there, this already works.
+
+So why don't we need the public folder in the url? Because, when we open up a url that the browser can't find in any of our routes, it will then look into the public folder that we defined and king of sets that folder to the root.
+So this http://127.0.0.1:3000/overview.html in now this public/overview.html
+
+Like this we can open any file that is in the public folder. What we can't do is public/img because this is not a file and it seems a route that the browser can't find.
+It only works for static files (.html, .png)
+
+When we make a request for a static file, like the html, there is a series of requests to our server in order to get all of the assets of that file.
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+ENVIRONMENT VARIABLES
+
+What they are, how we set them and how we use them.
+
+This is not exactly about express, it is about nodejs development in general, but we need this to move on in the project.
+
+So, nodejs, or express apps, can run in different environments. The most important ones are the development environment and the production environment.
+
+Because, depending on the environment, we might use different databases for ex., we might turn logging on or off or turn debugging on or off. All kinds of different settings that might change depending on the environment that we're in.
+
+The most important are those two, but there are others that bigger teams might use.
+
+This type of settings that we've mentioned, like different databases or turn logging on or off, this will be based on environment variables.
+
+By default, express sets the environment to development, which makes sense for when we start a new project.
+
+For demonstration purposes, let's look at that variable in the server. Remember that everything that is not related with express we do outside of app.js (this one we only use to configure everything that is related with the express application).
+
+console.log(app.get("env"));
+development on the console.
+
+So, development is the environment that we're currently in. app.get("env") will get us the "env" environment variable.
+
+In summary, environment variables are global variables that are used to define the environment in which a node app is running. 
+
+The "env" variable is set by express, but nodejs itself sets a lot of environment variables. Let's take a look at those as well. These are located at process.env.
+console.log(process.env);
+
+This log shows us a bunch of different environment variables that node uses internally.
+These variables come from the process core module and were set at the moment that the process started. We didn't even had to require the process module because it is available everywhere.
+
+In express, many packages depend on a special variable called node NODE_ENV
+This variable is kind of a convention that should define whether we are in development or in production mode.
+However, express does not define this variable, we have to do that manually.
+
+There are multiple ways in which we can do it, but let's start with the easiest one, which is to use the terminal.
+
+Remember that when we start the process we do it with npm start (nodemon server.js). So, we use nodemon server.js to start the process, but if we want to set an environment variable FOR this process we need to prepend that variable to the command that we use.
+So this is how it should look like:
+
+NODE_ENV=development nodemon server.js
+
+At this point, already have in mind the these variables must be defined BEFORE the process is started.
+
+Again, many packages on npm that we use for express development depend on the NODE_ENV environment variable. So, when our project is ready and we are gonna deploy it, we then change the variable to production.
+
+We usually use environment variables like configuration settings for our application. So, whenever our app needs some configuration for things that might change based on the environment that the app is running in, we use environment variables. 
+For example we might use different databases for development and for testing, so we could define one variable for each and then activate the right database according with to the environment.
+
+Also, we can set sensitive data like passwords and user name using environment variables.
+
+It is not really practical to define all of these variables on the command when we start the app/process.
+Instead, we create a config file config.env
+env is really the convention for defining a file which has these environment variables, that is why the extension of the file is recognized by vs code.
+In that file we define the variables in uppercase (convention). In there we defined the environment, the port is also a convention to define and then some sensitive data like a user and a password.
+
+With the variables created and set, we need a way of connecting the config.env file with our node application.
+We need a way of reading these variables from this file and then saving them as environment variables.
+
+The standard technique to do this is to use a package called dotenv (npm i dotenv). 
+We require the module in the server and use the config() method on it. In that method we need to pass an object to specify the path to our config file.
+
+This command reads the variables from the file and save them into nodejs environment variables.
+
+const dotenv = require("dotenv");
+
+dotenv.config({
+  path: "./config.env",
+});
+
+const app = require("./app");
+
+Now, to use these variables, we go to app.js and only run the logger middleware when we are in development. We have access to the variable in there because the reading of the variables from the env file to the process only happens once. They are then available all over the place. console.log(process.env);
+
+if (process.env.NODE_ENV === "development") {
+  app.use(morgan("dev"));
+}
+
+On the server, we use the same condition but for the port.
+
+IMPORTANT - When we tested with a request we saw that our logger wasn't working, even with the environment variable set to development.
+
+That happened because, on the server, we are requiring the app file before the environment variables are read from the config file. This needs to happen the other way around, otherwise the NODE_ENV variable, as we as the others, will be undefined. 
+
+As the final part, this allows us to create different scripts in the json file. We can create one for development, which is the same as before, and one for production. In production, we want the script to only change the NODE_ENV variable to production, so:
+
+"scripts": {
+    "start:dev": "nodemon server.js",
+    "start:prod": "NODE_ENV=production nodemon server.js"
+  },
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+SETTING UP ESLINT AND PRETTIER
+
 */

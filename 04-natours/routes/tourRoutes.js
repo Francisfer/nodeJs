@@ -1,19 +1,16 @@
 const express = require("express");
 const tourController = require("./../controllers/tourController");
-const router = express.Router();
 
+const router = express.Router();
+router.use(express.json());
 // PARAM MIDDLEWARE
-// 1.
-router.param("id", (req, res, next, val) => {
-  // 2.
-  console.log(`Tour id is ${val}`);
-  next();
-});
+
+router.param("id", tourController.checkID);
 
 router
   .route("/")
   .get(tourController.getAllTours)
-  .post(tourController.createTour);
+  .post(tourController.checkBody, tourController.createTour);
 
 router
   .route("/:id")
