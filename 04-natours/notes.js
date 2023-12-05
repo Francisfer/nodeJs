@@ -1713,4 +1713,79 @@ As the final part, this allows us to create different scripts in the json file. 
 
 SETTING UP ESLINT AND PRETTIER
 
+Eslint is a program that constantly scans our code and finds potential coding errors or bad coding practices.
+
+It is very configurable so that we can fine tune it to our needs and coding habits.
+We can also use eslint for code formatting, but we will keep using prettier for that.
+
+Prettier will keep being our main code formatter, but under some eslint rules that we will define. All eslint will do for us is to highlight the errors.
+
+RECIPE TO FOLLOW
+
+1. The first thing to do is to install eslint extension.
+
+2. Next we need to install a bunch of dev dependencies. Prettier and eslint must also be installed as dependencies (npm packages).
+
+eslint-config-prettier -> Disables formatting for eslint.
+
+eslint-plugin-prettier -> This one will allow eslint to show formatting errors as we type (again using prettier).
+
+eslint-config-airbnb -> Javascript style guide that we can follow. The most popular is airbnb style guide (we use an eslint configuration, just like we did with prettier).
+
+eslint-plugin-node -> Adds a couple of specific eslint rules only for nodejs (basically to find some errors that we might be doing when writing nodejs code).
+
+The following three plugins are necessary to make the airbnb style guide actually work:
+
+eslint-plugin-import 
+
+eslint-plugin-jsx-a11y
+
+eslint-plugin-react
+
+3. Now we need config files for both prettier and eslint. The prettier config file is where he allows the use of the single-quotes.
+The file for eslint was also already in the starter files. We can configure it much more.
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+INTRODUCTION TO MONGODB.
+
+Mongodb is a noSQL database. The more traditional database is called relational database.
+
+In mongo, each database can contain one or more collections (a table of data in relational databases). Then, each collection can contain one or more data structures called documents (a row in a table in relational databases).
+
+Each document contains the data about one single entity, for ex one blog post, one user or one review. The collection is like the parent structure that contains all these entities, for ex a blog collection for all posts, a users collection for all the users or a reviews collection for all the reviews.
+
+We can also see in the examples that the document has a data format that looks just like json, making our job easier when we start dealing with these documents.
+
+Mongo's main features ----->
+
+As we saw before, mongodb is a document-based database, so it stores data in documents, which are field-value paired data structures like json (instead of rows in a table like in traditional relational databases). Therefore it is a noSQL database and not a relational one. 
+
+Mongo has built-in scalability, making it easy to distribute data across multiple machines as the apps get more users and starts generating much more data.
+
+Another feature is the great flexibility of mongo, there is no need to define a document data schema before filling it with data. This means that each document can have a different number and type of fields. We can also change these fields all the time.
+
+It is a very performant database thanks to features like embedded data models, indexing, sharding, flexible documents that we already talked about, native duplication and more.
+
+DOCUMENTS, BSON AND EMBEDDING.
+
+Let's talk a bit deeper about these documents, returning to our blog post example from the beginning, a json object with id, title, author, length, etc. could be a very simple representation of a single post document. 
+This is called bson, it looks basically the same as json but it is typed (meaning that all values (not the keys) will have a data type such as string, boolean, number).
+
+Just like json, these bson documents will also have fields and data stored in key value pairs.
+
+Another extremely important feature in mongo, is the concept of embedded documents (the array of documents that are the comments in the blog).
+Embedding/Denormalizing means including related data into a single document. This allows for a quicker access and easier data models (not always the best solution). In the example, the comments are related to the post, so they are included in the same document.
+
+This makes the database more performant in some situations because, this way, it can be easy to read all the data that we need at once.
+
+We download the community server in order to learn. When we finish the extraction, the content is a folder, what we need from there are the executable files in bin.
+
+We need to copy them into a special binary folder that we have on our system. CONTINUE 1.58
+
+
 */
