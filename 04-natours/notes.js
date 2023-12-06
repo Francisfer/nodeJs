@@ -1787,5 +1787,146 @@ We download the community server in order to learn. When we finish the extractio
 
 We need to copy them into a special binary folder that we have on our system. CONTINUE 1.58
 
+MAC INSTALLATION
 
+Download the community server, the folder that we're interested in is the bin folder, which contains the executable files.
+
+We need to copy them into a special binary's folder that we have on our system. We go to the terminal and do a copy command with super user do. cp for copy and drag the executables into the terminal so that we don't have to write the path. 
+
+We copy these files to a folder located in /usr/local/bin
+
+To assure that they are there we go to that folder with cd /usr/local/bin
+In that folder we also see the packages that we've installed globally like the live server.
+
+The next step is to create a folder where the database can store the data. We need permissions once again. sudo mkdir /data/db
+
+https://stackoverflow.com/questions/58034955/read-only-file-system-when-attempting-mkdir-data-db-on-mac
+
+Now we give permission to the database to be able to write in this folder. sudo chown -R "id -un" /data/db
+
+Now we should be able to call mongod (keep in mind that all this is done in the bin folder). This gets the mongo process running, telling us that is waiting for connections on port ...
+This is basically the mongo server, meaning that mongodb is now running in the background, but we need to connect to it to create new databases and new collections.
+
+This window must keep running, so in another tab we run the mongo shell writing mongo. Now we are connected to our mongodb server that is running on local host on the default port.
+
+If we now write db, we have a test database on our computer. We could have use the mongo shell to connect to a remote database
+
+CREATING A LOCAL DATABASE WITH MONGO SHELL
+
+So we have the mongo server running on the background and the mongo shell on another tab.
+ 
+To create a database we write use. Use can also be to move from one database to another, but if there is no database with that name it will create a new one.
+use natours-test
+
+Now this database is ready to receive some data, remember that, inside databases we have collections and each collection has documents in it.
+The data that we create in mongo shell is always documents, so we have to create that document inside of a collection, so we specify that collection before we insert a document. 
+db stands for the current database(natours-test), then we specify the name of the collection, and, on that, we use the insertOne function. 
+Later on we will have a collection for users, reviews and all of the resources that we've created in the last section.
+
+Now, to insert a document in the tours collection we need to remember that mongodb uses BSON, which is very similar to json. This means that we can pass a javascript object into this insertOne function and that will be converted into bson.
+
+db.tours.insertOne({ name: "The Forest Hiker", price: 297, rating: 4.7})
+
+This is just a javascript object, we could have used quotes on the keys(property names), but that is optional.
+
+Just like this, we have created our first document in our database, to check that we use db (current database) 
+db.tours.find()
+
+Like this we can see the document that we have just created and, also, we can see that an id was automatically created to identify this document.
+
+Another useful command is show dbs, which shows us all the databases that we have in mongodb. If we had several, we would use the use command to switch to one of these. Again, use is to create a new database or to move from one database to another.
+
+Show collections command to see all the collections that we have in the database that we've created. 
+
+These are the very basic commands in the mongo shell, next we will create documents, query them, update them and also delete them. So, the CRUD operations.
+
+To quit the mongo shell we just have to type quit().
+
+CRUD - CREATING NEW DOCUMENTS.
+
+Before we start this operation, we are learning the basics of mongodb on the terminal so that we can understand them without the context of any application, completely outside of nodejs. 
+This because, in theory, we can use mongodb with any other language or framework. This is why it is a good idea to learn mongodb completely on its own without the context of any language. 
+
+So, in the last lecture we have created a new database called natours-test, a new collection inside called tours and one new document in there. 
+
+Now, to create two documents at the same time it works like this. insertMany() accepts an array of multiple objects. All we need to do is to fill them.
+Notice that, in the second object we added a new property/field, remember that mongodb documents are very flexible, they do not all have to have the same structure.
+
+db.tours.insertMany({ name: "The Sea Explorer", price: 497, rating: 4.8 },
+                    { name: "The Snow Adventurer", price: 997, rating: 4.9, difficulty: "easy" })
+
+Upon hitting return, we have inserted two new documents with new id's. Again, we can see these documents with db.tours.find() and, right now we have our three tours.
+
+CRUD - QUERYING (READING) DOCUMENTS.
+
+Querying for data in a database is one of the most important operations that we have in databases.
+
+There are a couple of query operators in mongodb 
+
+db.tours.find() - We already know this one, which is used to query for all the documents inside of a collection (tours).
+
+But let's say that we only want one tour and we already know it's name. We use the same find(), but this time we are passing in a filter object (the search criteria that we want). We simply set the tour name to the tour that we want to find. That's it, we can use the property that we want, the difficulty for ex.
+db.tours.find({ name: "The Forest Hiker"})
+______________________________________________________________________________________
+This is the easiest way to search for documents, but let's take it to the next level by using some special query operators.
+What we want is to search for tours which have a price below 500. So we can already see that we can search based on a condition, not only based on the properties.
+In the filter object, we are searching for price and, to use the < operator we need to define a new object where we set the $lte (less than) property to 500. This looks weird, but it is how query operators are used in mongodb.
+The dollar sign is reserved for the mongo operators, so whenever you see them you know what they are.
+
+db.tours.find({ price: {$lte: 500} })
+
+______________________________________________________________________________________
+AND querying - Querying for documents where both conditions are both true. 
+
+For two search criteria, for documents with a price less or equal than 500, but also with a rating greater than or equal to 4.8.
+
+db.tours.find({ price: {$lte: 500}, rating: {$gte: 4.8} })
+______________________________________________________________________________________
+OR querying - Querying for documents where one of the conditions is true.
+
+We specify the or operator and in there we specify an array where we place the conditions. The or operator accepts an array of conditions.
+
+db.tours.find({ $or: [{price: {$lte: 500}}, { rating: {$gte: 4.8}}] })
+
+Besides the filter object, we can also pass in an object for projection, projection means that we only want to select some of the properties to appear in the output. 
+We will make the same query, but we only want the name of the tours that satisfy the previously established condition (name of the tour in our case). 
+The id is always there.
+
+This uses kind of the same technique for ordering grid rows (all are at zero)
+
+db.tours.find({ $or: [{price: {$lte: 500}}, { rating: {$gte: 4.8}}] }, { name: 1})
+
+$lte - Less than or equal.
+$lt - Less than.
+$gte - Greater than or equal.
+$gt - Greater than.
+
+CRUD - UPDATING DOCUMENTS.
+
+In order to update one document, we use updateOne(). In this function, the first argument is to select which document we want to update and, the second argument, is to pass in the data that should be updated. 
+Basically, the first argument is a filter object (to query for the document that we want to update) and the second is another object to specify what we want to update. 
+
+To update we use the $set operator with another object where we specify the property and the value that we want to update.
+
+db.tours.updateOne({ name: "The Snow Adventurer" }, { $set { price: 597 }})
+
+In order to demonstrate how we would update more than one document, imagine that we wanted to use the same condition than before, so to first do a query for tours with a price greater than 500 and a rating greater or equal to 4.8. 
+This would be our premium tours, so we want to create that property on the documents (tours) that satisfy that condition.
+
+Like this we update several documents and also create a new property.
+
+db.tours.updateMany({ price: {$gt: 500}, rating: {$gte: 4.8} }, { $set { premium: true}})
+
+Check replaceOne() and replaceMany()
+
+CRUD - DELETING DOCUMENTS.
+
+We have deleteOne() and deleteMany().
+
+db.tours.deleteMany({ rating: {$lt: 4.8} })
+
+delete everything - db.tours.deleteMany({}) DANGEROUS
+
+
+USING COMPASS APP FOR CRUD OPERATIONS
 */
