@@ -1929,4 +1929,92 @@ delete everything - db.tours.deleteMany({}) DANGEROUS
 
 
 USING COMPASS APP FOR CRUD OPERATIONS
+
+Instead of using the terminal to work with mongodb, we can also use an app with a gui called compass. Just need to download.
+
+CREATING A HOSTED DATABASE WITH ATLAS
+
+We are going to create a remote database hosted on mongodb atlas.
+
+For developing our project, we will not use a local database on our computer like we've been doing so far.
+
+In the mongodb website we have the atlas, which is a database service provider. This means that it takes all the pain of managing and scaling databases from us.
+Apart from that it is very important to have our database in the cloud, this way we can develop our application from everywhere.
+
+We just create an account and on it, a cluster.
+First we whitelist our ip address, create a mongodb user (francisFerreira) and a password (1Aa89nGeFlNPnToF).
+
+Now we need to choose a connection method, we start with compass. We copy the connection string and go to compass.
+
+In compass, we just need to start a new connection, paste the string and replace the password in the authentication tab.
+
+After this, we can see two databases that come pre-configured in the cluster. We create our own (natours) and we also need to create a collection right away, we call it tours because that's where we've started.
+
+Now we insert our first document. add data, then document and change the view. When we insert numbers we choose double because: Numeric numbers containing 8 bytes (64-bit IEEE 754 floating point) floating-point are stored using the double data type.
+
+Like this, we have our first tour document created on our remote database. To see then on atlas we browse the collections in our cluster.
+Another thing that we usually do is to allow access to this cluster, remember that we've whitelisted our ip in order to grant access to our current computer to this cluster. But if we change computers, we need to whitelist that pc as well.
+We can allow access to every computer, we still need the password and the username. 
+This is done on security, network access, add ip address and allow access from anywhere.
+
+He also connects with the mongo shell.
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+CONNECTING OUR REMOTE DATABASE WITH THE EXPRESS APP.
+
+Now it's time to connect the mongodb database that we've created on atlas with our express application.
+
+1. First we need the connection string from atlas. We choose connect on the cluster and, instead of connecting to compass (already done), we connect to our application. The interface changed, so we use drivers to connect. 
+Then, in our application, we create it as an environment variable on config.env (where we put the password also).
+
+2. In the string, we need to put in our password. We could paste it directly, but it is better to leave it in a separate variable and then replace it in code. So, we just change the placeholder with uppercase in order to make it more visible.
+@cluster0.acuikzb.mongodb.net This part of the url is our host, the place where the database is hosted.
+
+After the host, we have /?, between these two characters is where we write the name of the database to which we want to connect to. In our case natours.
+
+DATABASE=mongodb+srv://francisFerreira:<PASSWORD>@cluster0.acuikzb.mongodb.net/natours?retryWrites=true&w=majority
+
+3. We are done with configuration, next we need to install a mongodb driver, a software that allows our node code to access and interact with a mongodb database.
+There are a couple of mongodb drivers, but we are going to use the most popular one, called mongoose, which adds a couple of features to the more native mongodb driver.
+So, we are not going to install the one that atlas suggest us.
+
+npm i mongoose
+
+He uses version @5.
+
+4. Now, let's go to server.js (kind of the file where we do all the setup of the app), this is also where we configure mongodb.
+We start by requiring the package. On the mongoose variable we call connect() method.
+Into the connect method we need to pass in our database connection string, but we still need to change the password.
+So, we create a database variable where we replace the placeholder for our password, it's all that this does.
+
+const DB = process.env.DATABASE.replace(
+  "<PASSWORD>",
+  process.env.DATABASE_PASSWORD
+);
+
+The first argument of the connect method is the connection string and, the second, is an object of options.
+These are some options that we need to specify in order to deal with deprecation warnings (DEPRECATED - we don't need to include these options object because they are already as default).
+
+The connect method is gonna return a promise with the resolved value being a connection object (con). 
+We log the con object to see the connections property.
+
+mongoose
+  .connect(DB, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false,
+  })
+  .then((con) => {
+    console.log(con.connections);
+    console.log("DB connection successful!");
+  });
+
+npm start we have a connection.
+
+what is mongoose
 */
