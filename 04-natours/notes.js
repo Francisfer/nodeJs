@@ -2014,7 +2014,128 @@ mongoose
     console.log("DB connection successful!");
   });
 
+mongoose.connect(DB).then(() => console.log("DB connection successful!"));
+
 npm start we have a connection.
 
-what is mongoose
+WHAT IS MONGOOSE
+
+We have connected our application with the database using mongoose in the last lecture.
+
+Mongoose gives us a lot more functionality than the regular mongodb driver out of the box.
+
+Some of the features that mongoose gives us are schemas to model data and relationships, easy data validation, simple query api, middleware etc.
+
+In mongoose, a schema is where we model our data, where we describe the structure of the data, default values and validation.
+
+We then take that schema and create a model out of it. The model is basically a wrapper around the schema, providing an interface to the database for crud operations.
+
+CREATING A SIMPLE TOUR MODEL
+
+In the last lecture, we have learned about schemas and models, let's now implement a very simple schema and model for our application.
+
+For now we do this in the server.js, later we will move this into a different file.
+
+Mongoose is all about models, a model being like a blueprint that we use to create documents, similar to classes in javascript.
+
+So, we create a model in mongoose in order to create documents with it (also query, update and delete these documents).
+
+In order to create a model, we need a schema (models are created out of schemas). 
+We use a schema to describe our data, to set default values, to validate the data, etc.
+
+Let's now create a schema for our tours.
+
+1. We say tourSchema is equal to a new mongoose schema. Inside we pass the schema as an object.
+We can also pass in some options into the schema, but we will do that when we need that feature.
+Remember the tour documents that we've created before, we always gave them a name, a rating and a price.
+Let's replicate that here.
+We need to specify the type of data that we expect for each of the fields (mongoose uses the native javascript data types).
+
+const tourSchema = new mongoose.Schema({
+  name: String,
+  rating: Number,
+  price: Number,
+});
+
+This is the most basic way of describing a schema, but we can take it one step further by defining something called schema type options for each field or for some specific field.
+
+To do this, instead of specifying the data type directly, we pass another object where we can add some more options.
+
+These schema type options can be different for different types (for ex. the number type has some different options than the string type), but many of them are also similar (required).
+
+When we set the price property to be required, we can specify the error that we want to be displayed when we are missing this field (called fields because this must come from a form).
+We just create an array where we first set it to true and then we define the error string.
+
+We can specify an option that says that the name should be unique.
+
+const tourSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: [true, "A tour must have a name."],
+    unique: true,
+  },
+  rating: {
+    type: Number,
+    default: 4.5,
+  },
+  price: {
+    type: Number,
+    required: [true, "A tour must have a price."],
+  },
+});
+
+We can also set default values, like we do for the rating. Like this, if we create a new tour document using this schema and not specifying the rating, it will be set to the value that we defined.
+
+This is our very basic schema, let's now create a model out of it.
+
+2. We create a Tour variable and set it to be a mongoose.model(). Inside this method we describe the name of the model, same as the variable name (both in uppercase like classes), and then the schema.
+
+const Tour = mongoose.model("Tour", tourSchema);
+
+This is how we create a Tour model out of the schema that we've created before.
+
+Now its time to use this model to create our first tour document.
+RECAP - We used new mongoose.Schema() to specify a schema for our data (describing it and doing some validation - the required is a validator, validates if the value is there or not).
+Then, we've created a model out of this schema in order to create tour documents.
+
+CREATING DOCUMENTS AND TESTING THE MODEL
+
+Let's start creating documents, testing the model and really start using mongoose.
+
+3. We create a new variable that will be a new document created out of the tour model. So, we say new Tour and then pass in the data inside of an object.
+
+This is a new document that we've created out of a tour model or function constructors. This is kind of using javascript function constructors or javascript classes to create new objects out of a class.
+It is exactly the same syntax (the new keyword and the class name).
+
+Like this we can say that this testTour document is an instance of the Tour model. This also means that it has a couple of methods on it that we can use to interact with the database.
+
+For example we can now say testTour.save(). The save method will save this document into the tours collection.
+We have our document instance where we can call the save method in order to save it to the database.
+
+The save() will return a promise that we can consume, for now we will use then() for that.
+The resolved value of this promise is the final document that was saved in the database.
+
+Saving the document into the database can also go wrong, so we need to catch that potential error.
+
+const Tour = mongoose.model("Tour", tourSchema);
+
+const testTour = new Tour({
+  name: "The Forest Hiker",
+  rating: 4.7,
+  price: 497,
+});
+
+testTour
+  .save()
+  .then((doc) => {
+    console.log(doc);
+  })
+  .catch((error) => {
+    console.log("ERROR:", error);
+  });
+
+That is it, our new document was added to the database successfully. Remember that we've deleted the tours collection (not the natours database) in compass, mongoose automatically created this new collection in the natours database as soon as we created the first document using the Tour model.
+The name tours (plural and without capital T) comes from the Tour model.
+
+Now, if we save again we get an error because the name must be unique.
 */
