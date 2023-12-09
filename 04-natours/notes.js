@@ -2139,3 +2139,60 @@ The name tours (plural and without capital T) comes from the Tour model.
 
 Now, if we save again we get an error because the name must be unique.
 */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+INTRO TO BACK-END ARCHITECTURE: MVC, TYPES OF LOGIC AND MORE.
+
+Until this point, we've just wrote code without thinking much about our application architecture. 
+
+As the app grows, we need to start worrying about the way we design our code architecture.
+
+In this project we are going to use a well known architecture called the mvc. The mvc can be implemented in many ways, but we are going to do this in the most straightforward way.
+
+In this architecture, the model layer is concerned with everything about the application's data and the business logic.
+
+Next, we have the controller layer, the function of the controllers is to handle the application's requests, interact with models and send back responses to the client (application logic).
+
+The view layer is necessary if we have a graphical interface in our app. In other words, if we are building a server-side rendered website.
+In this case, the view layer consists basically of the templates used to generate the view (the website that we're going to send back to the client). This is the presentation logic.
+For now we are just building the api, so this is for a bit later in the course.
+
+Using a pattern or an architecture like this allows us to write a more modular application, which is going to be way easier to maintain and scale as necessary.
+
+Let's take a look at the mvc in the context of our app and the request/response cycle.
+
+IMPORTANT:
+
+1. As always, it all starts with a request. That request will hit one of our routers, remember that we have multiple routers (one for each resource).
+The goal of the router is to delegate the request to the correct handler function, which will be in one of the controllers. Again, there will be one controller for each of our resources, keeping these different parts of our app nicely separated.
+
+2. Then, depending on the incoming request, the controller might need to interact with one of the models, for example to retrieve a certain document from the database or to create a new one (crud). 
+Once more, there is one model file for each resource (tourModel, userModel).
+
+3. After getting the data from the model, the controller might be ready to send back a response to the client with that data, for ex.
+In case we actually want to render a website, there is one more step involved, so, after getting the data from the model, the controller will select one of the view templates and inject the data into it.
+That rendered website will then be sent as the response.
+In the view layer, of an express app, there is usually one view template for each page (like a tour overview page, a tour detail page or a login page).
+
+This is a broad overview of the architecture that we are going to implement in this project.
+
+To finish, a little more detail on model and controller. One of the big goals of the mvc is to separate business logic from application logic.
+You will hear about these types of logic all the time when you browse stack overflow, but what are these types of logic.
+This different is a bit opinionated, but application logic is all the code that is concerned about the application's implementation. So, not the underlying business problem that we actually try to solve with the application.
+We can say that application logic is the logic that makes the app work. In express, a big part of the application logic is all about managing requests and responses (controller). 
+If we have views in our app, the application logic serves as a bridge between model and view layers, like this we never mix business logic with presentation logic.
+
+The business logic is all the code that actually solves the business problem, in our example is to show tours to customers and then sell them.
+The code that is directly related to the business rules, to how the business works and what the business needs is the business logic.
+Some examples in our app are creating new tours in the database, checking if the users password is correct, validating user input data or ensuring that only users who bought a certain tour can review it.
+All of this is concerned with the business itself, so it's part of the business logic.
+
+We need to keep in mind that application logic and business logic are almost impossible to separate completely, so, sometimes they will overlap.
+However, we should do our best efforts to keep the application logic in our controllers and business logic in our models.
+
+There is even this philosophy of fat models thin controllers, which says that we should offload as much logic as possible into the models, and keep the controllers as simple and lean as they can be.
+
+*/
