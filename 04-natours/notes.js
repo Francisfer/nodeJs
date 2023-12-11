@@ -2196,3 +2196,64 @@ However, we should do our best efforts to keep the application logic in our cont
 There is even this philosophy of fat models thin controllers, which says that we should offload as much logic as possible into the models, and keep the controllers as simple and lean as they can be.
 
 */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+REFACTORING FOR MVC
+
+We are going to refactor our code to fit the mvc architecture a bit better.
+We already have our controller folder (with the controllers for the user and tour) and the routes folder (with the routers for each resource).
+
+So, at this point, we need to create a model folder and create a tour model in there.
+In the tourModel.js file, we are going to put the schema and the tour model declaration.
+
+All we want to do in the server file is to connect to the database. Everything that is about the models themselves will always be in the files inside of the models folder.
+
+In the model file, we want to export the model from it. This should be the only thing that we export from this file. So we use the default export with module.exports.
+
+Like this we have our tour model nicely separated in a different file.
+
+Now, where do we actually need this tour? Where are we going to query, create, delete and update tours?
+We are going to do this in the tour controller.
+
+So, we need to import the model
+const Tour = require("../models/tourModel");
+
+We also changed the code from the crud operations so that it doesn't keep depending on the files that we have locally, as for the check id function, we also no longer need it because we are going to start working with the ids that are coming from mongodb.
+Mongodb itself will give us an error if we use an invalid id.
+
+But keep in mind that this function was useful to show how middleware actually works.
+
+exports.checkID = (req, res, next, val) => {
+  const id = Number(req.params.id);
+  console.log(`Tour id is ${val}`);
+  if (id > tours.length) {
+    return res.status(404).json({
+      status: "fail",
+      message: "Invalid ID",
+    });
+  }
+  next();
+};
+
+*/
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+/*
+
+ANOTHER WAY OF CREATING DOCUMENTS
+
+We have already learned how to create new documents in the database, now, we are going to learn an easier and better way of doing so as we create our tourHandler. 
+
+At this point, our api doesn't do anything anymore, we've deleted all the functionality that we had.
+
+Now we can rebuilt our api using a real database. 
+
+1. We start by implementing our createTour function/handler.
+
+
+
+*/
