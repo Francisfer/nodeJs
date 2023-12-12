@@ -5,16 +5,6 @@ const Tour = require("../models/tourModel");
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 // );
 
-exports.checkBody = (req, res, next) => {
-  console.log(req.body.name);
-  if (!req.body.name || !req.body.price) {
-    return res.status(400).json({
-      status: "fail",
-      message: "No name or price for the tour",
-    });
-  }
-  next();
-};
 exports.getAllTours = (req, res) => {
   res.status(200).json({
     status: "success",

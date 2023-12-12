@@ -2252,8 +2252,32 @@ At this point, our api doesn't do anything anymore, we've deleted all the functi
 
 Now we can rebuilt our api using a real database. 
 
-1. We start by implementing our createTour function/handler.
+We start by implementing our createTour function/handler. Remember that this is the handler that get's called as soon as there is a post request to the /tours route.
 
+The check body handler is a function that we no longer need, remember that we've used it to validate the body (to see if it had the name or the price property in it).
 
+exports.checkBody = (req, res, next) => {
+  console.log(req.body.name);
+  if (!req.body.name || !req.body.price) {
+    return res.status(400).json({
+      status: "fail",
+      message: "No name or price for the tour",
+    });
+  }
+  next();
+};
+
+Now it is our mongoose model that is going to take care of that
+
+So, in the createTour handler:
+
+1. Let's start by creating a new tour, and we are going to do that based on the data that comes from the request body.
+Remember that, before we used to create a new tour like this:
+const newTour = new Tour({})
+newTour.save()
+Here we've created a tour from the model, and on that tour we used the save method.   
+
+This works kind of fine, but we can do it in an easier way.
+We call the create method right on the model itself. The create() method also returns a promise
 
 */
