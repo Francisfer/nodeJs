@@ -12,6 +12,12 @@ import { parse } from "csv-parse/browser/esm";
 
 // The readable stream emits various different named events, depending on what is currently happening to that file. the close event and the data event when a chunk of data was read from the file. And the end event.
 
+// When we log the results, we get an array of buffers, these buffers are just objects that node uses to represent a collection of bytes.
+
+// This happens because createReadStream is just reading the raw data in our file as bits and bytes.
+
+// This means that we still need to parse the results and understand the values of the kepler's observations.
+
 import fs from "fs";
 
 const results = [];
