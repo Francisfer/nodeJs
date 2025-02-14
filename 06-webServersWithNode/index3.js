@@ -75,8 +75,43 @@ server.listen(PORT, () => console.log(`Server listening on port: ${PORT}`));
 
 ----------------------------------- Same Origin Policy -----------------------------------
 
---> 
+--> There is a concept that is important to understand, the same origin policy.
+
+
+--> What is a origin?
+
+  -> When we type the url of a website is something like https://www.google.com/maps/.
+
+  -> The origin is a combination of three things that are in the url.
+
+    -> 1. The protocol - How we are communication with the google server, in this case with https protocol.
+
+    -> 2. The host - A critical part of the origin, tells us which server is going to be handling our request. www.google.com.
+
+    -> 3. The port - Whenever is included in the request we can see it, but not often. 442 is the port for https. https://www.google.com:442/maps/
+
+
+  --> Whenever one of these parts changes, we are no longer on the same origin. We can browse to other pages at that origin, like mail instead of maps but we cannot change www.google.com to facebook.com and still be at the same origin.
+
+    -> We also can't change the protocol, if we change to http, the origin also changes.
 
 
 
+--> Javascript and the browser uses the same origin policy.
+
+  -> This policy is a security feature that restricts what the browser is allowed to load when we are browsing pages on the internet.
+
+  -> This basically has to do with the fact that we can be on one origin and make a post request to a different origin, however, we cannot make a get request under the same origin.
+
+  -> CORS - Cross Origin Resource Sharing. It is a way of relaxing the restrictions that the same origin policy puts on the developers.
+
+    -> This allows us to make applications that potentially span many different domains and origins.
+
+    -> The same origin policy generally limits us to talk to just one origin in the browser.
+
+    -> But if we have content on many different origins or we have many different apis at different sites we need to use a header in our responses.
+
+    -> The access-control-allow-origin: * allows us as developers to allow an exception when we know requests from a different domain are safe and expected.
+
+    -> For example, if we have an online shop app, we would be expecting requests from paypal to proceed with the payments. Like so, we would have to include paypal domain on Access-Control-Allow-Origin: paypal domain.
 */
