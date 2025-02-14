@@ -33,7 +33,16 @@
 import { parse } from "csv-parse";
 import fs from "fs";
 
-const results = [];
+const habitablePlanets = [];
+
+function isHabitablePlanet(planetObj) {
+  return (
+    planetObj.koi_disposition === "CONFIRMED" &&
+    planetObj.koi_insol > 0.36 &&
+    planetObj.koi_insol < 1.11 &&
+    planetObj.koi_prad < 1.6
+  );
+}
 
 fs.createReadStream("kepler_data.csv")
   .pipe(
@@ -44,10 +53,10 @@ fs.createReadStream("kepler_data.csv")
   )
   .on("data", (data) => {
     // Pushing each chunk of data into the array.
-    results.push(data);
+    if (isHabitablePlanet(data)) habitablePlanets.push(data);
   })
   .on("error", (err) => console.error(err))
   .on("end", () => {
-    console.log(results);
-    console.log("done processing the file");
+    // console.log(habitablePlanets);
+    console.log(`${habitablePlanets.length} habitable planets found!`);
   });
