@@ -1,5 +1,3 @@
-import { parse } from "csv-parse/browser/esm";
-
 // This parser converts csv files into arrays and objects.
 
 // It implements the node.js stream API. Streaming means that we work on the data as it arrives, without having to wait for large files to be fully available in memory.
@@ -18,11 +16,32 @@ import { parse } from "csv-parse/browser/esm";
 
 // This means that we still need to parse the results and understand the values of the kepler's observations.
 
+// What we want is to parse each chunk of data that comes in our stream as a row of comma (,) separated value file.
+
+// This outputs an object where the name of the column is the key and the corresponding value is assigned to that key.
+
+// Because the parse function is designed to be used with streams, we can pipe the output of our file to the parse function.
+
+// The pipe function is meant to connect a readable stream source to a writable stream destination.
+
+// The kepler file is our source and the parse function is the destination for our pipe.
+
+// There are a few different ways of parsing csv data, depending on how the file is written. In this case, the comments start with an #, but it could be other symbol.
+
+// For the file to be parsed correctly, we can pass in an object of options to the parse function.
+
+import { parse } from "csv-parse";
 import fs from "fs";
 
 const results = [];
 
 fs.createReadStream("kepler_data.csv")
+  .pipe(
+    parse({
+      columns: true,
+      comment: "#",
+    })
+  )
   .on("data", (data) => {
     // Pushing each chunk of data into the array.
     results.push(data);
