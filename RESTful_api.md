@@ -17,3 +17,17 @@
 -> The representation and the state, both refer to how the server makes the data available.
 
 -> Transfer refers to how the data is sent back to the user.
+
+# CRUD
+
+--> When it comes to apis, crud refers to the four basic operations that we can perform on data.
+
+--> When we talk about http apis or RESTful apis, the crud operations correspond to the http verbs.
+
+-> We can perform these crud operations to an entire collection of data of to a specific item in that collection (by the id).
+
+-> This means that we make a post request to the entire collection (customers for ex) to create a new customer and not to the customer specific item.
+
+-> If we want to update the entire customer object, we can use a put request. Because it updates the object and replaces the data.
+
+-> If we just want to update certain parts of the customer object, we use patch. However, the most common is to use put.
