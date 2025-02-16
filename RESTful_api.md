@@ -31,3 +31,13 @@
 -> If we want to update the entire customer object, we can use a put request. Because it updates the object and replaces the data.
 
 -> If we just want to update certain parts of the customer object, we use patch. However, the most common is to use put.
+
+# Running scripts from other folders.
+
+--> Older syntax:
+"server": "cd server && npm run watch",
+"client": "cd client && npm run start",
+
+--> Newer syntax:
+"server": "npm run watch --prefix server",
+"client": "npm run start --prefix client",
